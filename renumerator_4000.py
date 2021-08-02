@@ -1,6 +1,7 @@
 import win32com.client
-from pyautocad import Autocad, APoint, ACAD
+from pyautocad import Autocad
 import time
+
 
 def report():
     print()
@@ -9,11 +10,12 @@ def report():
     if counter % 10 == 1:
         print(f'Изменён {counter} элемент за {program_runtime} с.')
     elif counter % 10 == 2 or counter % 10 == 3 or counter % 10 == 4:
-        print(f'Изменёно {counter} элемента за {program_runtime} с.')
+        print(f'Изменено {counter} элемента за {program_runtime} с.')
     else:
-        print(f'Изменёно {counter} элементов за {program_runtime} с.')
+        print(f'Изменено {counter} элементов за {program_runtime} с.')
     print('в файле:', acad.doc.Name)
     print('*' * 50)
+
 
 acad = win32com.client.Dispatch("AutoCAD.Application")
 doc = acad.ActiveDocument  # Document object
@@ -46,7 +48,7 @@ for entity in doc.ModelSpace:
             # print(entity.Name)
             for attrib in entity.GetAttributes():
                 # first condition - latin alphabet, second - russian alphabet
-                if (attrib.TextString[:(prefix_length)] == prefix and
+                if (attrib.TextString[:prefix_length] == prefix and
                         start_num <= int((attrib.TextString[prefix_length:])[:-suffix_length]) <= finish_num):
                     current_num = int((attrib.TextString[prefix_length:])[:-suffix_length])
                     modified_num = str(current_num + increment)
@@ -59,11 +61,4 @@ end_time = time.time()
 program_runtime = int(end_time - start_time)
 
 report()
-
-
-
-
-
-
-
 
