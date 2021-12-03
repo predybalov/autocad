@@ -7,39 +7,67 @@ xl_app = wc.Dispatch("Excel.Application").Sheets("Work")
 data = {}
 element = []
 c = []
+tmpc1, tmpc2 = '', ''
+ppp = []
 
 # Iterate trough all objects (entities) in the currently opened drawing
 for entity in acad_app.ModelSpace:
-# Specify block Name as EffectiveName and layer name as Layer
+    # Specify block Name as EffectiveName and layer name as Layer
     if entity.EntityName == 'AcDbBlockReference' and entity.EffectiveName == 'Сечение_ПК' \
             and entity.Visible == True and entity.Layer == '0_373ПС81_Сечения_ПК':
         for attrib in entity.GetAttributes():
             if attrib.TagString == 'SECTION':
                 element.append(int(attrib.TextString[1:]))
             elif attrib.TagString == 'CABLES':
-                tmp1 = []
-                tmp2 = attrib.TextString.split(',')
-                for value in tmp2:
-                    # If the cable contains the character
-                    if value[-1].lower() == 'a' or value[-1].lower() == 'а':
-                        tmp1.append(float(value[:-1] + '.1'))
-                    else:
-                        tmp1.append(float(value))
-                tmp1.sort()
-                element.append(tmp1)
+                tmpc1 = attrib.TextString
+            elif attrib.TagString == 'CABLES2':
+                if len(attrib.TextString) > 0:
+                    tmpc2 = tmpc1 + ',' + attrib.TextString
+                    tc2 = tmpc2.split(',')
+                    ppp.append(tc2)
+                else:
+                    tmpc2 = tmpc1
+                    tc2 = tmpc2.split(',')
+                    ppp.append(tc2)
 
-for i in range(0, len(element), 2):
-    data[element[i]] = element[i + 1]
+# print(element)
+# print(ppp)
 
-# Because field in attribute value limited by 256 symbols
-# and some sections are not fit into the field, the variable below is used for solve this
-# big_values = {0: [0,0,0],
-#               1: [0,0,0]}
-#
-#
-#
-# data.update(big_values)
+xxx = []
+for value in ppp:
+    zzz = []
+    for c in value:
+        if c[-1].lower() == 'a' or c[-1].lower() == 'а':
+            zzz.append(float(c[:-1] + '.1'))
+        else:
+            zzz.append(float(c))
+        # print(c)
+        zzz.sort()
+    xxx.append(zzz)
+
+# print(element)
+# print(xxx)
+
+sum = []
+
+for i in range(len(element)):
+    sum.append(element[i])
+    sum.append(xxx[i])
+
+    print(element[i])
+    print(xxx[i])
+
+print(sum)
+
+for i in range(0, len(sum), 2):
+    data[sum[i]] = sum[i + 1]
+
+print(data)
+
 data = collections.OrderedDict(sorted(data.items()))
+
+print(data)
+
 
 # First row is for the header, therefore the filling starts from the second row
 counter = 2
