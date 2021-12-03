@@ -30,9 +30,6 @@ for entity in acad_app.ModelSpace:
                     tc2 = tmpc2.split(',')
                     ppp.append(tc2)
 
-# print(element)
-# print(ppp)
-
 xxx = []
 for value in ppp:
     zzz = []
