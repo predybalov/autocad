@@ -1,5 +1,6 @@
 import win32com.client as wc
 import collections
+import copy
 
 acad_app = wc.Dispatch("AutoCAD.Application").ActiveDocument
 xl_app = wc.Dispatch("Excel.Application").Sheets("Work")
@@ -51,68 +52,185 @@ for i in range(len(element)):
     sum.append(element[i])
     sum.append(xxx[i])
 
-    print(element[i])
-    print(xxx[i])
-
-print(sum)
+#     print(element[i])
+#     print(xxx[i])
+#
+# print(sum)
 
 for i in range(0, len(sum), 2):
     data[sum[i]] = sum[i + 1]
 
-print(data)
 
 data = collections.OrderedDict(sorted(data.items()))
 
-print(data)
 
+
+###
+data2 = copy.deepcopy(data)
+###
+data3 = copy.deepcopy(data)
+###
 
 # First row is for the header, therefore the filling starts from the second row
 counter = 2
 
 # Iterate through key:value pairs in the dictionary and fill sections
+
+
+
+line = ''
+length = 50
+counter = 1
+i = 1
+
 for key in data:
+    # print(key)
+    # print(data[key])
+
     xl_app.Cells(counter, 1).Value = 'A' + str(key)
-    tmp3 = []
-    for k in data[key]:
-        if str(k)[-2:] == '.1':
-            tmp4 = '3‐' + str(k)[:-2] + 'a'
-            tmp3.append(tmp4)
-        elif str(k)[-2:] == '.0':
-            tmp4 = '3‐' + str(k)[:-2]
-            tmp3.append(tmp4)
+    while len(data[key]) > 0:
+
+
+        if (len(line) + len(str(data[key][0]))) < length:
+            if str(data[key][0])[-1] == '0':
+                line = line + '3-' + str(data[key][0])[:-2] + ', '
+                data[key].pop(0)
+            else:
+                line = line + '3-' + str(data[key][0])[:-2] + 'а' + ', '
+                data[key].pop(0)
         else:
-            tmp4 = '3‐' + str(k)
-            tmp3.append(tmp4)
-    k3 = '\'' + ', '.join(tmp3)
-    xl_app.Cells(counter, 2).Value = k3
+            xl_app.Cells(counter, 2).Value = line[:-1]
+            line = ''
+            counter += 1
+
+    xl_app.Cells(counter, 2).Value = line[:-2]
+    line = ''
     counter += 1
+    i += 1
+
+
+
+# for key in data:
+#     xl_app.Cells(counter, 1).Value = 'A' + str(key)
+#     tmp3 = []
+#     for k in data[key]:
+#         if str(k)[-2:] == '.1':
+#             tmp4 = '3‐' + str(k)[:-2] + 'a'
+#             tmp3.append(tmp4)
+#         elif str(k)[-2:] == '.0':
+#             tmp4 = '3‐' + str(k)[:-2]
+#             tmp3.append(tmp4)
+#         else:
+#             tmp4 = '3‐' + str(k)
+#             tmp3.append(tmp4)
+#     k3 = '\'' + ', '.join(tmp3)
+#     xl_app.Cells(counter, 2).Value = k3
+#     counter += 1
+
+
+
+
+
+
+
+
+
+# # Create list of the cables
+# numbers = []
+# for key in data2:
+#     numbers += data2[key]
+# numbers_set = sorted(set(numbers))
+#
+#
+# final_numbers = []
+# for cable in numbers_set:
+#     if cable != int(cable):
+#         final_numbers.append('3‐' + str(cable)[:-2] + 'a')
+#     else:
+#         final_numbers.append('3‐' + str(int(cable)))
+
+
 
 # Create list of the cables
 numbers = []
-for key in data:
-    numbers += data[key]
+for key in data2:
+    numbers += data2[key]
 numbers_set = sorted(set(numbers))
+
 
 final_numbers = []
 for cable in numbers_set:
     if cable != int(cable):
-        final_numbers.append('3‐' + str(cable)[:-2] + 'a')
+        final_numbers.append(str(cable))
     else:
-        final_numbers.append('3‐' + str(int(cable)))
+        final_numbers.append(str(cable))
 
 
-# Iterate through key:value pairs in the dictionary and fill cables
-i = 1
+data10 = {}
 
-for cable in final_numbers:
-    xl_app.Cells(i + 1, 8).Value = cable
-    tmp5 = []
-    for key in data:
-        for value in data[key]:
-            if str(value)[-2:] == '.1' and cable[2:-1] == str(value)[:-2]:
-                tmp5.append('A' + str(key))
-            elif str(float(value))[-2:] == '.0' and cable[2:] == str(float(value))[:-2]:
-                tmp5.append('A' + str(key))
-    tmp6 = ', '.join(tmp5)
-    xl_app.Cells(i + 1, 9).Value = tmp6
+for number in final_numbers:
+    tmpf = []
+    for value in data3:
+        if float(number) in data3[value]:
+            tmpf.append(value)
+            # print(number + '->' + str(value))
+
+    data10[float(number)] = tmpf
+
+data11 = collections.OrderedDict(sorted(data10.items()))
+
+counter = 1
+length = 45
+
+for key in data11:
+    # print(key)
+    # print(data[key])
+
+    if str(key)[-2:] == '.1':
+        xl_app.Cells(counter, 5).Value = '3-' + str(key)[:-2] + 'а'
+    elif str(key)[-2:] == '.0':
+        xl_app.Cells(counter, 5).Value = '3-' + str(key)[:-2]
+    else:
+        print('Ошибка')
+
+    while len(data11[key]) > 0:
+
+        if (len(line) + len(str(data11[key][0]))) < length:
+            if str(data11[key][0])[-1] == '0':
+                line = line + 'А' + str(data11[key][0]) + ', '
+                data11[key].pop(0)
+            else:
+                line = line + 'А' + str(data11[key][0]) + ', '
+                data11[key].pop(0)
+        else:
+            xl_app.Cells(counter, 6).Value = line[:-1]
+            line = ''
+            counter += 1
+
+    xl_app.Cells(counter, 6).Value = line[:-2]
+    line = ''
+    counter += 1
     i += 1
+
+
+
+
+
+
+
+
+# # Iterate through key:value pairs in the dictionary and fill cables
+# i = 1
+#
+# for cable in final_numbers:
+#     xl_app.Cells(i + 1, 8).Value = cable
+#     tmp5 = []
+#     for key in data2:
+#         for value in data2[key]:
+#             if str(value)[-2:] == '.1' and cable[2:-1] == str(value)[:-2]:
+#                 tmp5.append('A' + str(key))
+#             elif str(float(value))[-2:] == '.0' and cable[2:] == str(float(value))[:-2]:
+#                 tmp5.append('A' + str(key))
+#     tmp6 = ', '.join(tmp5)
+#     xl_app.Cells(i + 1, 9).Value = tmp6
+#     i += 1
