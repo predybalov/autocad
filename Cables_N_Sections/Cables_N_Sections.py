@@ -18,7 +18,7 @@ ppp = []
 for entity in acad_app.ModelSpace:
     # Specify block Name as EffectiveName and layer name as Layer
     if entity.EntityName == 'AcDbBlockReference' and entity.EffectiveName == 'Сечение_ПК' \
-            and entity.Visible == True and entity.Layer == '0_373ПС81_Сечения_ПК':
+            and entity.Visible is True and entity.Layer == '0_373ПС81_Сечения_ПК':
         for attrib in entity.GetAttributes():
             if attrib.TagString == 'SECTION':
                 element.append(int(attrib.TextString[1:]))
@@ -65,6 +65,10 @@ data2 = copy.deepcopy(data)
 ###
 data3 = copy.deepcopy(data)
 ###
+
+
+# Set format for cells
+xl_app.Range("R:AC").NumberFormat = "@"
 
 
 # Iterate through key:value pairs in the dictionary and fill sections
@@ -156,25 +160,61 @@ for key in data11:
     counter += 1
     i += 1
     if mount == 0:
-        xl_app.Cells(counter, 6).Value = ''
+        xl_app.Cells(counter, column + 1).Value = ''
         counter += 1
 
+end_line = 2000
 
 # Fill cable journal
-for i in range(1, 2000):
+for i in range(1, end_line):
     if xl_app.Cells(i, 1).Value == '' or xl_app.Cells(i, 1).Value == xl_app.Cells(i, 18).Value:
         continue
     else:
         r = 'A' + str(i) + ':' + 'P' + str(i)
         xl_app.Range(r).Insert()
 
-for i in range(1, 2000):
+for i in range(1, end_line):
     xl_app.Cells(i, 12).Value = xl_app.Cells(i, 19).Value
 
 
 xl_app.Columns(18).Clear()
 xl_app.Columns(19).Clear()
 
+
+# Add blank lines to fit document format (first page - 24 lines, subsequent pages - 30 lines)
+prev = 0
+page = 1
+lines1 = 24
+
+for current in range(1, lines1 + 10):
+    if xl_app.Cells(current, 1).Value != '' and xl_app.Cells(current, 1).Value is not None:
+        if prev <= lines1*page and current > lines1*page + 1:
+            j = prev
+            step = lines1*page - prev + 1
+            for j in range(step):
+                r = 'A' + str(prev) + ':' + 'P' + str(prev)
+                xl_app.Range(r).Insert()
+            page += 1
+        elif current > lines1*page:
+            page += 1
+        prev = current
+
+lines2 = 30
+page = 1
+
+for current in range(25, end_line):
+    if xl_app.Cells(current, 1).Value != '' and xl_app.Cells(current, 1).Value is not None:
+        if prev <= lines2*page + lines1 and current > lines2*page + lines1 + 1:
+            j = prev
+            step = lines2*page + lines1 - prev + 1
+            for j in range(step):
+                r = 'A' + str(prev) + ':' + 'P' + str(prev)
+                xl_app.Range(r).Insert()
+            page += 1
+        elif current > lines2*page + lines1:
+            page += 1
+        prev = current
+
 stop = time.time()
 
-print(round(stop - start))
+print(round(stop - start), 'sec')
