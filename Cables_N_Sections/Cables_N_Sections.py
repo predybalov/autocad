@@ -11,18 +11,19 @@ import win32com.client as wc
 import copy
 import time
 
+
+# INPUT DATA
+num_prefix = '1-'
+excel_sheet_name = 'ПК'
+
+
 acad_app = wc.Dispatch("AutoCAD.Application").ActiveDocument.ModelSpace
-xl_app = wc.Dispatch("Excel.Application").Sheets("ПКt")
+xl_app = wc.Dispatch("Excel.Application").Sheets(excel_sheet_name)
 
 start = time.time()
 
 section_set, cable_set_unsort = [], []
 cabline_1, cabline_2 = '', ''
-
-
-# INPUT DATA
-num_prefix = '1-'
-
 
 # Iterate trough all objects (entities) in the currently opened drawing
 for block in acad_app:
