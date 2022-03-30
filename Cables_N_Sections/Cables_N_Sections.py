@@ -12,12 +12,17 @@ import copy
 import time
 
 acad_app = wc.Dispatch("AutoCAD.Application").ActiveDocument.ModelSpace
-xl_app = wc.Dispatch("Excel.Application").Sheets("Work")
+xl_app = wc.Dispatch("Excel.Application").Sheets("ПКt")
 
 start = time.time()
 
 section_set, cable_set_unsort = [], []
 cabline_1, cabline_2 = '', ''
+
+
+# INPUT DATA
+num_prefix = '1-'
+
 
 # Iterate trough all objects (entities) in the currently opened drawing
 for block in acad_app:
@@ -94,10 +99,10 @@ for s in common_set:
     while len(common_set[s]) > 0:
         if (len(line) + len(str(common_set[s][0]))) < length:
             if str(common_set[s][0])[-1] == '0':
-                line = line + '3-' + str(common_set[s][0])[:-2] + ', '
+                line = line + num_prefix + str(common_set[s][0])[:-2] + ', '
                 common_set[s].pop(0)
             else:
-                line = line + '3-' + str(common_set[s][0])[:-2] + 'а' + ', '
+                line = line + num_prefix + str(common_set[s][0])[:-2] + 'а' + ', '
                 common_set[s].pop(0)
         else:
             xl_app.Cells(counter, column+1).Value = line[:-1]
@@ -134,9 +139,9 @@ column = 18
 
 for c in cabsec:
     if str(c)[-2:] == '.1':
-        xl_app.Cells(counter, column).Value = '3-' + str(c)[:-2] + 'а'
+        xl_app.Cells(counter, column).Value = num_prefix + str(c)[:-2] + 'а'
     elif str(c)[-2:] == '.0':
-        xl_app.Cells(counter, column).Value = '3-' + str(c)[:-2]
+        xl_app.Cells(counter, column).Value = num_prefix + str(c)[:-2]
     else:
         print('Ошибка')
 
