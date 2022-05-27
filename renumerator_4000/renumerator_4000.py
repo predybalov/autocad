@@ -1,10 +1,16 @@
+"""
+Изменение нумерации объекта чертежа, имеющего формат ПРЕФИКС ЗНАЧЕНИЕ [СУФФИКС]
+Префикс обязателен, суффикс может отсутствовать
+Нумерация изменяется в соответствии с указнным шагов в указанном диапазоне
+"""
+
 import tkinter as tk
 import win32com.client
 import time
 from pyautocad import Autocad
 
 
-def renumerate():
+def renum():
     global prefix
     global suffix
     global start_num
@@ -34,16 +40,27 @@ def renumerate():
         if entity.EntityName == 'AcDbBlockReference':
             for attrib in entity.GetAttributes():
                 # first condition - latin alphabet, second - russian alphabet
-                if (attrib.TextString[:prefix_length] == prefix and
-                        start_num <= int((attrib.TextString[prefix_length:])[:-suffix_length]) <= stop_num):
-                    current_num = int((attrib.TextString[prefix_length:])[:-suffix_length])
-                    modified_num = str(current_num + increment)
-                    modText = prefix + modified_num + suffix
-                    print(attrib.TextString, '->', modText)
-                    attrib.TextString = modText
-                    counter += 1
-        if (stop_num - start_num + 1) == counter:
-            break
+                if suffix_length >= 1:
+                    if attrib.TextString[:prefix_length] == prefix and \
+                            start_num <= int((attrib.TextString[prefix_length:])[:-suffix_length]) <= stop_num:
+                        current_num = int((attrib.TextString[prefix_length:])[:-suffix_length])
+                        modified_num = str(current_num + increment)
+                        modtext = prefix + modified_num + suffix
+                        print(attrib.TextString, '->', modtext)
+                        attrib.TextString = modtext
+                        counter += 1
+                if suffix_length == 0:
+                    if attrib.TextString[:prefix_length] == prefix:
+                        current_num = int(attrib.TextString[prefix_length:])
+                        modified_num = str(current_num + increment)
+                        modtext = prefix + modified_num
+                        print(attrib.TextString, '->', modtext)
+                        attrib.TextString = modtext
+                        counter += 1
+                else:
+                    exit(1)
+            if (stop_num - start_num + 1) == counter:
+                break
 
     end_time = time.time()
     program_runtime = int(end_time - start_time)
@@ -74,7 +91,7 @@ height = 200
 back_color = '#505050'
 root.title('Перенумератор 4000')
 # Window dimensions 'width x height' and offset from the left top corner
-root.geometry(f'{width}x{height}+{int((1920-width)/2)}+{int((1080-height)/2)}')
+root.geometry(f'{width}x{height}+{int((1920 - width) / 2)}+{int((1080 - height) / 2)}')
 root.resizable(False, False)
 
 label_prefix = tk.Label(root, text='Введите префикс')
@@ -83,15 +100,13 @@ label_start_num = tk.Label(root, text='Введите начальное зна�
 label_stop_num = tk.Label(root, text='Введите последнее значение')
 label_increment = tk.Label(root, text='Введите шаг (+/-)')
 
-
 prefix_entry = tk.Entry(root)
 suffix_entry = tk.Entry(root)
 start_num_entry = tk.Entry(root)
 stop_num_entry = tk.Entry(root)
 increment_entry = tk.Entry(root)
 
-calc_button = tk.Button(root, text='Поехали!', command=renumerate)
-
+calc_button = tk.Button(root, text='Поехали!', command=renum)
 
 label_prefix.grid(row=0, column=0)
 label_suffix.grid(row=1, column=0)
